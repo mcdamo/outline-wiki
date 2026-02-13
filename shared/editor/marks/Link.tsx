@@ -12,7 +12,7 @@ import type { Command, EditorState } from "prosemirror-state";
 import { Plugin, TextSelection } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import { toast } from "sonner";
-import { isUrl, sanitizeUrl } from "../../utils/urls";
+import { isInternalUrl, isUrl, sanitizeUrl } from "../../utils/urls";
 import { getMarkRange } from "../queries/getMarkRange";
 import Mark from "./Mark";
 import {
@@ -23,6 +23,8 @@ import {
   toggleLink,
 } from "../commands/link";
 import { isInCode } from "../queries/isInCode";
+import { GlobeIcon } from "outline-icons";
+import ReactDOM from "react-dom";
 
 const LINK_INPUT_REGEX = /\[([^[]+)]\((\S+)\)$/;
 
@@ -80,16 +82,41 @@ export default class Link extends Mark {
           }),
         },
       ],
-      toDOM: (node) => [
-        "a",
-        {
-          title: node.attrs.title,
-          href: sanitizeUrl(node.attrs.href),
-          class: "use-hover-preview",
-          rel: "noopener noreferrer nofollow",
-        },
-        0,
-      ],
+      toDOM: (node) => {
+        const isInternal = isInternalUrl(node.attrs.href);
+        const linkColor = isInternal ? '#080' : '#2b73b7';
+        const aNode = [
+          "a",
+          {
+            title: node.attrs.title,
+            href: sanitizeUrl(node.attrs.href),
+            class: "use-hover-preview",
+            rel: "noopener noreferrer nofollow",
+            style: `color: ${linkColor}`,
+          }, 0];
+        if (isInternal) {
+          return aNode;
+        }
+        let icon;
+        if (typeof document !== "undefined") {
+          let component;
+          component = <GlobeIcon style={{marginBottom: '-7px'}} />;
+
+          icon = document.createElement("span");
+          icon.className = "icon";
+          ReactDOM.render(component, icon);
+        } else {
+          icon = '🌐';
+        }
+        return [
+          "span",
+          {
+            class: "link-wrapper",
+          },
+          icon,
+          aNode,
+        ];
+      },
     };
   }
 
