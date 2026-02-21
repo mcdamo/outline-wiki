@@ -1427,7 +1427,7 @@ p {
 .heading-content a,
 p a {
   color: ${props.theme.text};
-  text-decoration: underline;
+  /*text-decoration: underline;*/
   text-decoration-color: ${lighten(0.5, props.theme.text)};
   text-decoration-thickness: 1px;
   text-underline-offset: .15em;
