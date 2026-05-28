@@ -13,7 +13,7 @@ import type { Command, EditorState } from "prosemirror-state";
 import { Plugin, TextSelection } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
 import { toast } from "sonner";
-import { isUrl, sanitizeUrl } from "../../utils/urls";
+import { isInternalUrl, isUrl, sanitizeUrl } from "../../utils/urls";
 import { getMarkRange } from "../queries/getMarkRange";
 import Mark from "./Mark";
 import {
@@ -92,16 +92,19 @@ export default class Link extends Mark<LinkOptions> {
           }),
         },
       ],
-      toDOM: (node) => [
-        "a",
-        {
-          title: node.attrs.title,
-          href: sanitizeUrl(node.attrs.href),
-          class: "use-hover-preview",
-          rel: "noopener noreferrer nofollow",
-        },
-        0,
-      ],
+      toDOM: (node) => {
+        const isInternal = isInternalUrl(node.attrs.href);
+        const linkColor = isInternal ? '#080' : '#2b73b7';
+        return [
+          "a",
+          {
+            title: node.attrs.title,
+            href: sanitizeUrl(node.attrs.href),
+            class: "use-hover-preview",
+            rel: "noopener noreferrer nofollow",
+            style: `color: ${linkColor}`,
+          }, 0];
+      },
     };
   }
 
